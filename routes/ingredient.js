@@ -5,15 +5,16 @@ const Ingredient = require('../models/ingredients');
 const Category = require('../models/category');
 const category = require('../models/category');
 const recipe = require('../models/recipe');
+const { json } = require('body-parser');
 
-router.get("/:name", function (req, res) {
+router.get("/search/ingredient/:name", function (req, res) {
     var regex = new RegExp(req.params.name, 'i');
     Ingredient.find({ name: regex }).then((result) => {
         res.status(200).json(result)
     })
 });
 
-router.post("/", (req, res, next) => {
+router.post("/post/ingredient", (req, res, next) => {
     Category.findById(req.body.categoryId)
         .then(category => {
             if (!category) {
@@ -38,7 +39,7 @@ router.post("/", (req, res, next) => {
         });
 });
 
-router.get("/", (req, res, next) => {
+router.get("/getAll/ingredient", (req, res, next) => {
     Ingredient.find()
         .select(' name category ')
         .populate('category', ['name', 'photo'])
@@ -54,7 +55,7 @@ router.get("/", (req, res, next) => {
 });
 
 //todo 
-router.get("/getcategories/:categoryId", (req, res, next) => {
+router.get("/getingredient/bycategory/:categoryId", (req, res, next) => {
     Ingredient.find({ category: req.params.categoryId })
         .select(' name category ')
         .populate('category', ['name', 'photo'])
@@ -71,6 +72,50 @@ router.get("/getcategories/:categoryId", (req, res, next) => {
                 arr: arr
             }
             return res.status(200).json(data);
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
+
+router.get("/getallingredient/byallcategory", (req, res, next) => {
+    Ingredient.find()
+        .select(' name category ')
+        .populate('category', ['name', 'photo'])
+        .exec()
+        .then(docs => {
+            // console.log(docs);
+            // console.log("dumarr");
+
+            const dumarr = []
+            docs.map((item, index) => {
+                if (item.category?.name) {
+                    dumarr.push(item.category?.name)
+                }
+            })
+            const uniqVal = [...new Set(dumarr)]
+
+            // console.log("dumarr", uniqVal);
+            const finallarr = []
+            uniqVal.map((item) => {
+                const arr = []
+                let id = ""
+                let PhotoUrl = ""
+                docs.map(subItem => {
+                    if (subItem.category?.name === item) {
+                        id = subItem.category._id,
+                            PhotoUrl = subItem.category.photo
+                        arr.push({ name: subItem.name, id: subItem._id })
+                    }
+                })
+                finallarr.push({ id, photo: PhotoUrl, category_name: item, arr })
+            })
+
+            // console.log(finallarr)
+            return res.status(200).json(finallarr);
         })
         .catch(err => {
             res.status(500).json({
@@ -96,7 +141,7 @@ router.get("/filter/list", (req, res, next) => {
         });
 });
 
-router.get('/getingredient/:ingredientId', (req, res, next) => {
+router.get('/get/oneingredient/:ingredientId', (req, res, next) => {
     const id = req.params.ingredientId;
     Ingredient.findById(id)
         .select('name category')
@@ -139,7 +184,7 @@ router.get('/getingredient/:ingredientId', (req, res, next) => {
 //         });
 // })
 
-router.delete('/:ingredientId', (req, res, next) => {
+router.delete('/deleteingredient/:ingredientId', (req, res, next) => {
     const id = req.params.ingredientId;
     Ingredient.deleteOne({ _id: id })
         .exec()

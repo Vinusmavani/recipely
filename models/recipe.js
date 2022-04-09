@@ -8,7 +8,6 @@ const recipeSchema = mongoose.Schema({
     steps: { type: Array, required: true },
     ingre: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ingredient' }],
     ctime: { type: Number, required: true },
-    visibility: Boolean,
     playlist: { type: mongoose.Schema.Types.ObjectId, ref: 'Playlist' },
     Rpic: { type: String, required: true },
     cloudinary_id: { type: String, required: true },

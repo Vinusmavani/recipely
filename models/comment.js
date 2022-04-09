@@ -5,8 +5,6 @@ const commentSchema = mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     recipe: { type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' },
     comment: { type: String, required: true },
-    visibility: Boolean,
-    rating: { type: String, required: true },
     time : { type : Date, default: Date.now }
 });
 

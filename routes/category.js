@@ -6,8 +6,8 @@ const upload = require('../utils/multer');
 
 const Category = require('../models/category');
 
-router.post('/postcategory', upload.single('photo'), async (req, res, next) => {
-    // try {
+router.post('/post/category', upload.single('photo'), async (req, res, next) => {
+    try {
     const result = await cloudinary.uploader.upload(req.file.path);
     const category = new Category({
         _id: mongoose.Types.ObjectId(),
@@ -29,15 +29,15 @@ router.post('/postcategory', upload.single('photo'), async (req, res, next) => {
                 error: err
             });
         });
-    // } catch (e) {
-    //     res.status(500).json({
-    //         message: "internal server error",
-    //         error: e
-    //     })
-    // }
+    } catch (e) {
+        res.status(500).json({
+            message: "internal server error",
+            error: e
+        })
+    }
 })
 
-router.get('/getAllcategory', (req, res, next) => {
+router.get('/getAll/category', (req, res, next) => {
     Category.find()
         //TODO set limit
         .select('name photo')

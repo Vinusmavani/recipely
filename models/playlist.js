@@ -6,7 +6,6 @@ const playlistSchema = mongoose.Schema({
     recipes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' }],
     photo: { type: String, required: true },
     cloudinary_id: { type: String, required: true },
-    // totalrecipes: {type},
     time : { type : Date, default: Date.now }
 });
 

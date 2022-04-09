@@ -5,35 +5,40 @@ const cloudinary = require("../utils/cloudinary");
 const upload = require('../utils/multer');
 
 const Playlist = require("../models/playlist")
-const Recipe = require("../models/recipe")
 
-router.post('/postplaylist', upload.single('photo'), async (req, res, next) => {
-
-    const result = await cloudinary.uploader.upload(req.file.path);
-    const playlist = new Playlist({
-        _id: new mongoose.Types.ObjectId(),
-        name: req.body.name,
-        recipes: req.body.recipesid,
-        photo: result.secure_url,
-        cloudinary_id: result.public_id
-    });
-    await playlist.save()
-        .then(result => {
-            // console.log(result);
-            return res.status(201).json({
-                message: 'handling post request in /playlist',
-                createdPlaylist: result
-            });
-        })
-        .catch(err => {
-            // console.log(err);
-            res.status(500).json({
-                error: err
-            });
+router.post('/post/playlist', upload.single('photo'), async (req, res, next) => {
+    try {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        const playlist = new Playlist({
+            _id: new mongoose.Types.ObjectId(),
+            name: req.body.name,
+            recipes: req.body.recipesid,
+            photo: result.secure_url,
+            cloudinary_id: result.public_id
         });
+        await playlist.save()
+            .then(result => {
+                // console.log(result);
+                return res.status(201).json({
+                    message: 'handling post request in /playlist',
+                    createdPlaylist: result
+                });
+            })
+            .catch(err => {
+                // console.log(err);
+                res.status(500).json({
+                    error: err
+                });
+            });
+    } catch (e) {
+        res.status(500).json({
+            message: "internal server error",
+            error: e
+        })
+    }
 });
 
-router.get('/getAllPlaylist', (req, res, next) => {
+router.get('/get/AllPlaylist', (req, res, next) => {
     Playlist.find()
         //TODO set limit
         .select(' name photo recipes time ')
@@ -82,7 +87,7 @@ router.get('/getAllPlaylist', (req, res, next) => {
 //         });
 // });
 
-router.put('/updatePlaylist/:id', upload.single('photo'), async (req, res) => {
+router.put('/update/Playlist/:id', upload.single('photo'), async (req, res) => {
     try {
         let playlist = await Playlist.findById(req.params.id);
         await cloudinary.uploader.destroy(playlist.cloudinary_id);
@@ -100,17 +105,17 @@ router.put('/updatePlaylist/:id', upload.single('photo'), async (req, res) => {
     }
 })
 
-router.delete('/deletePlaylist/:id', async (req, res, next) => {
-    try{  
-      let playlist = await Playlist.findById(req.params.id);
-  
-      await cloudinary.uploader.destroy(playlist.cloudinary_id);
-  
-      await playlist.remove();
-      res.json(message="playlist deleted");
-      } catch (err) {
-          console.log(err);
-      }
-  });
+router.delete('/delete/Playlist/:id', async (req, res, next) => {
+    try {
+        let playlist = await Playlist.findById(req.params.id);
+
+        await cloudinary.uploader.destroy(playlist.cloudinary_id);
+
+        await playlist.remove();
+        res.json(message = "playlist deleted");
+    } catch (err) {
+        console.log(err);
+    }
+});
 
 module.exports = router;

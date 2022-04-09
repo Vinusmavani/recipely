@@ -6,38 +6,39 @@ const upload = require('../utils/multer');
 
 const Avatar = require('../models/avatar');
 
-// function throwObjWithStacktrace() {
-//     const someError = { statusCode: 500 }
-//     Error.captureStackTrace(someError)
-//     throw someError;
-// }
-
-router.post('/postavt', upload.single('avtpic'), async (req, res, next) => {
-    const result = await cloudinary.uploader.upload(req.file.path);
-    const avatar = new Avatar({
-        _id: new mongoose.Types.ObjectId(),
-        avtname: req.body.avtname,
-        avtpic: result.secure_url,
-        cloudinary_id: result.public_id
-    });
-    await avatar.save()
-        .then(result => {
-            // console.log(result);
-            return res.status(201).json({
-                message: 'handling post request in /Avatar',
-                createdAvatar: result
-            });
-        })
-        .catch(err => {
-            // console.log(err);
-            res.status(500).json({
-                error: err
-            });
+router.post('/post/avt', upload.single('avtpic'), async (req, res, next) => {
+    try {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        const avatar = new Avatar({
+            _id: new mongoose.Types.ObjectId(),
+            avtname: req.body.avtname,
+            avtpic: result.secure_url,
+            cloudinary_id: result.public_id
         });
+        await avatar.save()
+            .then(result => {
+                // console.log(result);
+                return res.status(201).json({
+                    message: 'handling post request in /Avatar',
+                    createdAvatar: result
+                });
+            })
+            .catch(err => {
+                // console.log(err);
+                res.status(500).json({
+                    error: err
+                });
+            });
+    }  catch (e) {
+        res.status(500).json({
+            message: "internal server error",
+            error: e
+        })
+    }
 });
 
-router.get('/getAll', async (req, res, next) => {
-    await Avatar.find()
+router.get('/getAll/avt', (req, res, next) => {
+    Avatar.find()
         //TODO set limit
         // .select('name photo')
         .exec()
@@ -56,9 +57,9 @@ router.get('/getAll', async (req, res, next) => {
         });
 });
 
-router.get('/getAvatar/:avatarId', async (req, res, next) => {
+router.get('/getAvatar/:avatarId', (req, res, next) => {
     const id = req.params.avatarId;
-    await Avatar.findById(id)
+    Avatar.findById(id)
         // .select('name photo')
         .exec()
         .then(docs => {

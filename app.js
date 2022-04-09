@@ -7,15 +7,8 @@ require('dotenv').config();
 const cors = require("cors");
 const app = express();
 
-const user = require('./routes/user');
-const avatar = require('./routes/avatar');
-const recipe = require('./routes/recipe');
-const ingredient = require('./routes/ingredient');
-const category = require('./routes/category');
-const comment = require('./routes/comment');
-const playlist = require('./routes/playlist');
-
-mongoose.connect('mongodb+srv://vinus:vinus@cluster0.rpksm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', { useUnifiedTopology: true, useNewUrlParser: true })
+// mongoose.connect('mongodb+srv://vinus:vinus@cluster0.rpksm.mongodb.net/Reciply?retryWrites=true&w=majority', { useUnifiedTopology: true, useNewUrlParser: true })
+mongoose.connect('mongodb://localhost:27017/Reciply', { useUnifiedTopology: true, useNewUrlParser: true })
 
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
@@ -25,13 +18,13 @@ app.use(cors());
 app.use(cookieparser())
 app.use(express.json())
 
-app.use('/user', user);
-app.use('/avatar', avatar);
-app.use('/recipe', recipe);
-app.use('/ingredient', ingredient);
-app.use('/category', category);
-app.use("/comment", comment);
-app.use("/playlist", playlist);
+app.use('/user', require('./routes/user'));
+app.use('/avatar', require('./routes/avatar'));
+app.use('/recipe', require('./routes/recipe'));
+app.use('/ingredient', require('./routes/ingredient'));
+app.use('/category', require('./routes/category'));
+app.use("/comment", require('./routes/comment'));
+app.use("/playlist", require('./routes/playlist'));
 
 app.use((req, res, next) => {
     const error = new Error("Not Found");

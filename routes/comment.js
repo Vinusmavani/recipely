@@ -5,14 +5,12 @@ const mongoose = require('mongoose');
 const Comment = require("../models/comment")
 const User = require("../models/user")
 
-router.post('/', (req, res, next) => {
+router.post('/post/comment', (req, res, next) => {
     const comment = new Comment({
         _id: new mongoose.Types.ObjectId(),
         user: req.body.userid,
         recipe: req.body.recipeid,
-        comment: req.body.comment,
-        visibility: req.body.visibility,
-        rating: req.body.rating
+        comment: req.body.comment
     });
     comment
         .save()
@@ -31,7 +29,7 @@ router.post('/', (req, res, next) => {
         });
 });
 
-router.get('/:commentId', (req, res, next) => {
+router.get('/getonecomment/:commentId', (req, res, next) => {
     const id = req.params.commentId;
     Comment.findById(id)
         .select(' userid recipeid comment rating visibility ')
@@ -72,7 +70,7 @@ router.get("/getCommentRecipe/:recipeId", (req, res) => {
     });
 })
 
-router.delete('/:commentId', (req, res, next) => {
+router.delete('/deletecomment/:commentId', (req, res, next) => {
     const id = req.params.commentId;
     Comment.deleteOne({ _id: id })
         .exec()
