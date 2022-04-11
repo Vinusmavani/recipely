@@ -79,14 +79,20 @@ router.post('/post/recipe/:userId', upload.single('Rpic'), async (req, res, next
 router.get('/getrecipe/:recipeId', (req, res, next) => {
     const id = req.params.recipeId;
     Recipe.findById({ _id: id })
+
         // .select('rname ulink desc steps ingre ctime visibility playlist Rpic time')
         .populate('ingre playlist', 'name')
         .exec()
         .then(docs => {
-            const response = {
-                recipe: docs
-            }
-            return res.status(200).json(response);
+            User.find({ recipe_ids: { "$in": [req.params.recipeId] } })
+                .select("username -_id")
+                .then(result => {
+                    const response = {
+                        recipe: result,docs,
+                    }
+                    return res.status(200).json(response);
+                })
+
         })
         .catch(err => {
             // console.log(err);

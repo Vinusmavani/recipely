@@ -59,31 +59,35 @@ router.get('/getonecomment/:commentId', (req, res, next) => {
 
 router.get("/getCommentRecipe/:recipeId", (req, res) => {
     Comment.find({ recipe: req.params.recipeId })
-    .then(result => {
-        return res.status(200).json(result);
-    })
-    .catch(err => {
-        // console.log(err);
-        res.status(500).json({
-            error: err
+        .select('user recipe comment time')
+        .populate('user', ['username'])
+        .then(result => {
+            return res.status(200).json(result);
+        })
+        .catch(err => {
+            // console.log(err);
+            res.status(500).json({
+                error: err
+            });
         });
-    });
 })
 
 router.get("/get/Allcomment", (req, res) => {
     Comment.find()
-    .then(result => {
-        return res.status(200).json(result);
-    })
-    .catch(err => {
-        // console.log(err);
-        res.status(500).json({
-            error: err
+        .select('user recipe comment time')
+        .populate('user', ['username'])
+        .then(result => {
+            return res.status(200).json(result);
+        })
+        .catch(err => {
+            // console.log(err);
+            res.status(500).json({
+                error: err
+            });
         });
-    });
 })
 
-router.delete('/deletecomment/:commentId', (req, res, next) => {
+router.delete('/delete/comment/:commentId', (req, res, next) => {
     const id = req.params.commentId;
     Comment.deleteOne({ _id: id })
         .exec()

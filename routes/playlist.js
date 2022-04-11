@@ -11,6 +11,7 @@ router.post('/post/playlist', upload.single('photo'), async (req, res, next) => 
         const result = await cloudinary.uploader.upload(req.file.path);
         const playlist = new Playlist({
             _id: new mongoose.Types.ObjectId(),
+            user: req.body.user,
             name: req.body.name,
             recipes: req.body.recipesid,
             photo: result.secure_url,
@@ -38,8 +39,8 @@ router.post('/post/playlist', upload.single('photo'), async (req, res, next) => 
     }
 });
 
-router.get('/get/AllPlaylist', (req, res, next) => {
-    Playlist.find()
+router.get('/get/AllPlaylist/:userid', (req, res, next) => {
+    Playlist.find({user:req.params.userid})
         //TODO set limit
         .select(' name photo recipes time ')
         .populate('recipes', ['rname', 'Rpic'])

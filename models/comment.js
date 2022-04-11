@@ -6,6 +6,6 @@ const commentSchema = mongoose.Schema({
     recipe: { type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' },
     comment: { type: String, required: true },
     time : { type : Date, default: Date.now }
-});
+});     
 
 module.exports = mongoose.model('Comment', commentSchema);

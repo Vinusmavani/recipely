@@ -125,7 +125,7 @@ router.get("/getallingredient/byallcategory", (req, res, next) => {
         });
 });
 
-router.get("/filter/list", (req, res, next) => {
+router.post("/filter/list", (req, res, next) => {
     const { dataarr } = req.body
 
     console.log([...dataarr])
@@ -185,7 +185,7 @@ router.get('/get/oneingredient/:ingredientId', (req, res, next) => {
 //         });
 // })
 
-router.delete('/deleteingredient/:ingredientId', (req, res, next) => {
+router.delete('/delete/ingredient/:ingredientId', (req, res, next) => {
     const id = req.params.ingredientId;
     Ingredient.deleteOne({ _id: id })
         .exec()

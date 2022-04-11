@@ -4,7 +4,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
-const User = require('../models/user')
+const User = require('../models/user');
+const { addAbortSignal } = require("nodemailer/lib/xoauth2");
 
 router.post('/signup/user', (req, res, next) => {
     User.find({ email: req.body.email })
@@ -124,6 +125,28 @@ router.get('/get/user', (req, res, next) => {
         });
 })
 
+router.post('/post/resetPassword/', (req, res, next) => {
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
+        User.find({ $and: [{ _id: req.body._id }, { password: hash }] })
+            .then(result => {
+                if (result == null) {
+                    //return not valid old password
+                }
+                else {
+                    User.updateOne({ _id: req.body._id }, { password: req.body.newPassword }).then(
+                        res.send(200).json({ message })
+                    )
+                }
+            }).catch(err => {
+                // console.log(err);
+                res.status(500).json({
+                    error: err
+                });
+            });
+    })
+
+})
+
 router.get('/get/byusername/:username', (req, res, next) => {
     const regex = new RegExp(req.params.username);
     User.findOne({ username: regex })
@@ -136,6 +159,26 @@ router.get('/get/byusername/:username', (req, res, next) => {
             const response = {
                 count: docs.length,
                 category: docs
+            }
+            return res.status(200).json(response);
+        })
+        .catch(err => {
+            // console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
+router.get('/getuser/byid/:userId', (req, res, next) => {
+    const id = req.params.userId;
+    User.findById({ _id: id })
+        // .select('rname ulink desc steps ingre ctime visibility playlist Rpic time')
+        // .populate('ingre playlist', 'name')
+        .exec()
+        .then(docs => {
+            const response = {
+                user: docs
             }
             return res.status(200).json(response);
         })
