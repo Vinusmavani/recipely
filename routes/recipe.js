@@ -6,7 +6,7 @@ const upload = require('../utils/multer');
 const checkAuth = require('../middleware/check-auth');
 
 const Recipe = require('../models/recipe');
-const User = require('../models/user');
+const Channel = require('../models/channel')
 
 router.get("/searchrecipe/:name", function (req, res) {
     var regex = new RegExp(req.params.name, 'i');
@@ -18,15 +18,18 @@ router.get("/searchrecipe/:name", function (req, res) {
 router.get('/getall/recipes', (req, res, next) => {
     Recipe.find()
         //TODO set limit
-        .select('rname ulink desc steps ingre ctime visibility playlist Rpic time')
+        .select('rname ulink desc steps ingre ctime playlist Rpic time')
         .populate("ingre")
         .exec()
         .then(docs => {
-            const response = {
-                total_recipes: docs.length,
-                recipes: docs
-            }
-            return res.status(200).json(response);
+            Channel.find({ recipe_ids })
+                .select("channelname -_id")
+                .then(result => {
+                    const response = {
+                        recipe: result,docs,
+                    }
+                    return res.status(200).json(response);
+                })
         })
         .catch(err => {
             // console.log(err);
@@ -36,7 +39,7 @@ router.get('/getall/recipes', (req, res, next) => {
         });
 });
 
-router.post('/post/recipe/:userId', upload.single('Rpic'), async (req, res, next) => {
+router.post('/post/recipe/:channelId', upload.single('Rpic'), async (req, res, next) => {
     // try {
     // console.log(typeof (req.body.ingre))
     const result = await cloudinary.uploader.upload(req.file.path);
@@ -55,7 +58,7 @@ router.post('/post/recipe/:userId', upload.single('Rpic'), async (req, res, next
     await recipe.save()
         .then(result => {
             // console.log(result);
-            User.updateOne({ _id: req.params.userId }, { $push: { recipe_ids: result._id } }).then(result => {
+            Channel.updateOne({ _id: req.params.channelId }, { $push: { recipe_ids: result._id } }).then(result => {
                 return res.status(201).json({
                     message: 'handling post request in /recipe',
                     createdRecipe: result
@@ -84,26 +87,27 @@ router.get('/getrecipe/:recipeId', (req, res, next) => {
         .populate('ingre playlist', 'name')
         .exec()
         .then(docs => {
-            User.find({ recipe_ids: { "$in": [req.params.recipeId] } })
-                .select("username -_id")
+            Channel.find({ recipe_ids: { "$in": [req.params.recipeId] } })
+                .select("channelname -_id")
                 .then(result => {
                     const response = {
-                        recipe: result,docs,
+                        recipe: docs,
+                        result
                     }
                     return res.status(200).json(response);
                 })
 
         })
         .catch(err => {
-            // console.log(err);
+            console.log(err);
             res.status(500).json({
                 error: err
             });
         });
 });
 
-router.post('/addfavourite/:userId', (req, res, next) => {
-    User.updateOne({ _id: req.params.userId }, { $push: { wishlist: req.body.recipeId } })
+router.post('/addfavourite/:channelId', (req, res, next) => {
+    Channel.updateOne({ _id: req.params.channelId }, { $push: { wishlist: req.body.recipeId } })
         .then(result => {
             return res.status(200).json(result);
         })
@@ -115,15 +119,15 @@ router.post('/addfavourite/:userId', (req, res, next) => {
         });
 });
 
-router.get('/getfavourite/:userid', (req, res, next) => {
-    User.findById(req.params.userid)
+router.get('/getfavourite/:channelid', (req, res, next) => {
+    Channel.findById(req.params.channelid)
         .select('wishlist')
         .populate('wishlist')
         .exec()
         .then(docs => {
             const response = {
                 count: docs.length,
-                users: docs
+                channels: docs
             }
             res.status(200).json(response);
         })
@@ -135,10 +139,10 @@ router.get('/getfavourite/:userid', (req, res, next) => {
         });
 })
 
-router.post('/removefavourite/:userId', (req, res, next) => {
+router.post('/removefavourite/:channelId', (req, res, next) => {
     const id = req.params.recipeId;
     Recipe.findById({ _id: id })
-    User.updateOne({ _id: req.params.userId }, { $pull: { wishlist: req.body.recipeId } })
+    Channel.updateOne({ _id: req.params.channelId }, { $pull: { wishlist: req.body.recipeId } })
         .then(result => {
             return res.status(200).json(result);
         })

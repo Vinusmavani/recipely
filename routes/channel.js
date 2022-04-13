@@ -4,15 +4,15 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
-const User = require('../models/user');
+const Channel = require('../models/channel');
 
-router.post('/signup/user', (req, res, next) => {
-    User.find({ email: req.body.email })
+router.post('/signup/Channel', (req, res, next) => {
+    Channel.find({ email: req.body.email })
         .exec()
-        .then(user => {
-            if (user.length >= 1) {
+        .then(channel => {
+            if (channel.length >= 1) {
                 return res.status(409).json({
-                    message: 'this email id is already exists...'
+                    message: 'this channel email id is already exists...'
                 });
             } else {
                 bcrypt.hash(req.body.password, 10, (err, hash) => {
@@ -21,18 +21,18 @@ router.post('/signup/user', (req, res, next) => {
                             error: err
                         })
                     } else {
-                        const user = new User({
+                        const channel = new Channel({
                             _id: new mongoose.Types.ObjectId(),
-                            username: req.body.username,
+                            channelname: req.body.channelname,
                             email: req.body.email,
                             password: hash
                         });
-                        user
+                        channel
                             .save()
                             .then(result => {
                                 console.log(result);
                                 res.status(201).json({
-                                    message: 'User created'
+                                    message: 'Channel created'
                                 });
                             })
                             .catch(err => {
@@ -47,16 +47,16 @@ router.post('/signup/user', (req, res, next) => {
         })
 });
 
-router.post('/signin/user', (req, res, next) => {
-    User.find({ email: req.body.email })
+router.post('/signin/channel', (req, res, next) => {
+    Channel.find({ email: req.body.email })
         .exec()
-        .then(user => {
-            if (user.length < 1) {
+        .then(channel => {
+            if (channel.length < 1) {
                 return res.status(401).json({
                     message: "Auth failed"
                 });
             }
-            bcrypt.compare(req.body.password, user[0].password, (err, result) => {
+            bcrypt.compare(req.body.password, channel[0].password, (err, result) => {
                 if (err) {
                     return res.status(401).json({
                         message: 'Auth failed'
@@ -65,8 +65,8 @@ router.post('/signin/user', (req, res, next) => {
                 if (result) {
                     const token = jwt.sign(
                         {
-                            email: user[0].email,
-                            userId: user[0]._id
+                            email: channel[0].email,
+                            channelId: channel[0]._id
                         },
                         process.env.JWT_KEY,
                         {
@@ -92,9 +92,9 @@ router.post('/signin/user', (req, res, next) => {
 })
 
 
-router.patch("/update/user", (req, res) => {
+router.patch("/update/channel", (req, res) => {
     //update quary
-    User.updateOne({ _id: req.body._id }, req.body)
+    Channel.updateOne({ _id: req.body._id }, req.body)
         .then(result => {
             res.status(200).json(result);
         }).catch(err => {
@@ -104,15 +104,15 @@ router.patch("/update/user", (req, res) => {
         })
 })
 
-router.get('/get/user', (req, res, next) => {
-    User.find()
+router.get('/get/channel', (req, res, next) => {
+    Channel.find()
         //TODO set limit
-        .select('username email')
+        .select('channelname email')
         .exec()
         .then(docs => {
             const response = {
                 count: docs.length,
-                users: docs
+                channels: docs
             }
             res.status(200).json(response);
         })
@@ -124,7 +124,7 @@ router.get('/get/user', (req, res, next) => {
         });
 })
 
-router.post('/post/resetPassword/user', (req, res, next) => {
+router.post('/post/resetPassword/channel', (req, res, next) => {
     bcrypt.hash(req.body.password, 10, (err, hash) => {
         User.find({ $and: [{ _id: req.body._id }, { password: hash }] })
             .then(result => {
@@ -146,15 +146,18 @@ router.post('/post/resetPassword/user', (req, res, next) => {
 
 })
 
-router.get('/get/byusername/:username', (req, res, next) => {
-    const regex = new RegExp(req.params.username);
-    User.findOne({ username: regex })
-        .select("username email -_id")
+router.get('/get/bychannelname/:channelname', (req, res, next) => {
+    const regex = new RegExp(req.params.channelname);
+    Channel.findOne({ channelname: regex })
+        .select('channelname email')
+
+        //TODO
+        .populate("recipe_ids avtid")
         .exec()
         .then(docs => {
             const response = {
                 count: docs.length,
-                user: docs
+                channel: docs
             }
             return res.status(200).json(response);
         })
@@ -166,15 +169,15 @@ router.get('/get/byusername/:username', (req, res, next) => {
         });
 });
 
-router.get('/getuser/byid/:userId', (req, res, next) => {
-    const id = req.params.userId;
-    User.findById({ _id: id })
+router.get('/getchannel/byid/:channelId', (req, res, next) => {
+    const id = req.params.channelId;
+    Channel.findById({ _id: id })
         // .select('rname ulink desc steps ingre ctime visibility playlist Rpic time')
         // .populate('ingre playlist', 'name')
         .exec()
         .then(docs => {
             const response = {
-                user: docs
+                channel: docs
             }
             return res.status(200).json(response);
         })
@@ -186,12 +189,12 @@ router.get('/getuser/byid/:userId', (req, res, next) => {
         });
 });
 
-router.delete('/delete/user/:userId', (req, res, next) => {
-    User.deleteOne({ _id: req.params.userId })
+router.delete('/delete/channel/:channelId', (req, res, next) => {
+    Channel.deleteOne({ _id: req.params.channelId })
         .exec()
         .then(result => {
             return res.status(200).json({
-                message: 'user deleted'
+                message: 'channel deleted'
             });
         })
         .catch(err => {

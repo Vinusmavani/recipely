@@ -86,9 +86,9 @@ router.get("/getallingredient/byallcategory", (req, res, next) => {
         .populate('category')
         .exec()
         .then(docs => {
-          
 
-      const dumarr = []
+
+            const dumarr = []
             docs.map((item, index) => {
                 if (item.category?.name) {
                     dumarr.push(item.category?.name)
@@ -107,12 +107,12 @@ router.get("/getallingredient/byallcategory", (req, res, next) => {
                     if (subItem.category?.name === item) {
                         console.log(subItem.category)
                         id = subItem.category._id,
-                        PhotoUrl = subItem.category.photo,
-                        isActive = subItem.category.isMore
+                            PhotoUrl = subItem.category.photo,
+                            isActive = subItem.category.isMore
                         arr.push({ id: subItem._id, name: subItem.name, isActive: subItem.category.isMore })
                     }
                 })
-                finallarr.push({ id, photo: PhotoUrl, category_name: item, isMore: isActive, arr})
+                finallarr.push({ id, photo: PhotoUrl, category_name: item, isMore: isActive, arr })
             })
 
             // console.log(finallarr)
@@ -127,10 +127,12 @@ router.get("/getallingredient/byallcategory", (req, res, next) => {
 
 router.post("/filter/list", (req, res, next) => {
     const { dataarr } = req.body
-
+       
     console.log([...dataarr])
 
     recipe.find({ ingre: { $in: dataarr } })
+    .select(' rname ulink desc steps ingre ctime Rpic ')
+    .populate('ingre', ["name"])
         .exec()
         .then(docs => {
             return res.status(200).json(docs);

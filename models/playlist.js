@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const playlistSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    user: { type: mongoose.Schema.ObjectId, ref: "User" },
+    channel: { type: mongoose.Schema.ObjectId, ref: "Channel" },
     name: { type: String, required: true },
     recipes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' }],
     photo: { type: String, required: true },

@@ -3,12 +3,11 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const Comment = require("../models/comment")
-const User = require("../models/user")
 
-router.post('/post/comment', (req, res, next) => {
+router.post('/post/comment/:userid', (req, res, next) => {
     const comment = new Comment({
         _id: new mongoose.Types.ObjectId(),
-        user: req.body.userid,
+        user: req.params.userid,
         recipe: req.body.recipeid,
         comment: req.body.comment
     });

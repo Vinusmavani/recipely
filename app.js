@@ -7,8 +7,8 @@ require('dotenv').config();
 const cors = require("cors");
 const app = express();
 
-// mongoose.connect('mongodb+srv://vinus:vinus@cluster0.rpksm.mongodb.net/Reciply?retryWrites=true&w=majority', { useUnifiedTopology: true, useNewUrlParser: true })
-mongoose.connect('mongodb://localhost:27017/Reciply', { useUnifiedTopology: true, useNewUrlParser: true })
+mongoose.connect('mongodb+srv://vinus:vinus@cluster0.rpksm.mongodb.net/Reciply?retryWrites=true&w=majority', { useUnifiedTopology: true, useNewUrlParser: true })
+// mongoose.connect('mongodb://localhost:27017/Reciply', { useUnifiedTopology: true, useNewUrlParser: true })
 
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
@@ -25,6 +25,7 @@ app.use('/ingredient', require('./routes/ingredient'));
 app.use('/category', require('./routes/category'));
 app.use("/comment", require('./routes/comment'));
 app.use("/playlist", require('./routes/playlist'));
+app.use("/channel", require('./routes/channel'));
 
 app.use((req, res, next) => {
     const error = new Error("Not Found");

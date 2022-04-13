@@ -6,12 +6,12 @@ const upload = require('../utils/multer');
 
 const Playlist = require("../models/playlist")
 
-router.post('/post/playlist', upload.single('photo'), async (req, res, next) => {
+router.post('/post/playlist/:channelid', upload.single('photo'), async (req, res, next) => {
     try {
         const result = await cloudinary.uploader.upload(req.file.path);
         const playlist = new Playlist({
             _id: new mongoose.Types.ObjectId(),
-            user: req.body.user,
+            channel: req.params.channelid,
             name: req.body.name,
             recipes: req.body.recipesid,
             photo: result.secure_url,
@@ -39,8 +39,8 @@ router.post('/post/playlist', upload.single('photo'), async (req, res, next) => 
     }
 });
 
-router.get('/get/AllPlaylist/:userid', (req, res, next) => {
-    Playlist.find({user:req.params.userid})
+router.get('/get/AllPlaylist/:channelid', (req, res, next) => {
+    Playlist.find({channel:req.params.channelid})
         //TODO set limit
         .select(' name photo recipes time ')
         .populate('recipes', ['rname', 'Rpic'])
@@ -88,9 +88,9 @@ router.get('/get/AllPlaylist/:userid', (req, res, next) => {
 //         });
 // });
 
-router.put('/update/Playlist/:id', upload.single('photo'), async (req, res) => {
+router.put('/update/Playlist/:playlistid', upload.single('photo'), async (req, res) => {
     try {
-        let playlist = await Playlist.findById(req.params.id);
+        let playlist = await Playlist.findById(req.params.playlistid);
         await cloudinary.uploader.destroy(playlist.cloudinary_id);
         const result = await cloudinary.uploader.upload(req.file.path);
         const data = {
