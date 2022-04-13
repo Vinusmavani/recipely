@@ -6,7 +6,8 @@ const upload = require('../utils/multer');
 const checkAuth = require('../middleware/check-auth');
 
 const Recipe = require('../models/recipe');
-const Channel = require('../models/channel')
+const Channel = require('../models/channel');
+const User = require('../models/user');
 
 router.get("/searchrecipe/:name", function (req, res) {
     var regex = new RegExp(req.params.name, 'i');
@@ -106,8 +107,8 @@ router.get('/getrecipe/:recipeId', (req, res, next) => {
         });
 });
 
-router.post('/addfavourite/:channelId', (req, res, next) => {
-    Channel.updateOne({ _id: req.params.channelId }, { $push: { wishlist: req.body.recipeId } })
+router.post('/addfavourite/:userId', (req, res, next) => {
+    User.updateOne({ _id: req.params.userId }, { $push: { favourite: req.body.recipeId } })
         .then(result => {
             return res.status(200).json(result);
         })
@@ -119,15 +120,15 @@ router.post('/addfavourite/:channelId', (req, res, next) => {
         });
 });
 
-router.get('/getfavourite/:channelid', (req, res, next) => {
-    Channel.findById(req.params.channelid)
-        .select('wishlist')
-        .populate('wishlist')
+router.get('/getfavourite/:userid', (req, res, next) => {
+    User.findById(req.params.userid)
+        .select('favourite')
+        .populate('favourite')
         .exec()
         .then(docs => {
             const response = {
                 count: docs.length,
-                channels: docs
+                users: docs
             }
             res.status(200).json(response);
         })
@@ -139,10 +140,10 @@ router.get('/getfavourite/:channelid', (req, res, next) => {
         });
 })
 
-router.post('/removefavourite/:channelId', (req, res, next) => {
+router.post('/removefavourite/:userId', (req, res, next) => {
     const id = req.params.recipeId;
     Recipe.findById({ _id: id })
-    Channel.updateOne({ _id: req.params.channelId }, { $pull: { wishlist: req.body.recipeId } })
+    User.updateOne({ _id: req.params.userId }, { $pull: { favourite: req.body.recipeId } })
         .then(result => {
             return res.status(200).json(result);
         })

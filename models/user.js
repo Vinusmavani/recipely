@@ -15,6 +15,7 @@ const userSchema = mongoose.Schema({
     password: { type: String, required: true },
     phone_no: Number,
     notification: { type: Boolean, default: true },
+    favourite: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' }],
     emailToken: { type: String },
     isVerified: { type: Boolean },
     time: { type: Date, default: Date.now() }

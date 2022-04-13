@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 const Channel = require('../models/channel');
 
-router.post('/signup/Channel', (req, res, next) => {
+router.post('/signup/channel', (req, res, next) => {
     Channel.find({ email: req.body.email })
         .exec()
         .then(channel => {
