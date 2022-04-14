@@ -16,6 +16,26 @@ router.get("/searchrecipe/:name", function (req, res) {
     })
 });
 
+router.get('/get/tutorial/:recipeId', (req, res, next) => {
+    const id = req.params.recipeId;
+    Recipe.findById({ _id: id })
+        .select('rname ulink desc steps ingre ctime Rpic time')
+        .populate('ingre', 'name')
+        .exec()
+        .then(docs => {
+            const response = {
+                recipe: docs
+            }
+            return res.status(200).json(response);
+        })
+        .catch(err => {
+            // console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 router.get('/getall/recipes', (req, res, next) => {
     Recipe.find()
         //TODO set limit
@@ -23,14 +43,32 @@ router.get('/getall/recipes', (req, res, next) => {
         .populate("ingre")
         .exec()
         .then(docs => {
-            Channel.find({ recipe_ids })
-                .select("channelname -_id")
-                .then(result => {
-                    const response = {
-                        recipe: result,docs,
-                    }
-                    return res.status(200).json(response);
-                })
+            var i = 0;
+            var temp = docs;
+            var responcee = [];
+
+            temp.map(value => {
+                Channel.find({ recipe_ids: { "$in": [value._id] } })
+                    .select("channelname -_id")
+                    .then(result => {
+                        value.chanalename = result;
+                        responcee.push({value, chanalename: result})
+                        i++;
+                        if (i === docs.length) {
+                            res.status(200).json({
+                                total_recipes: responcee.length,
+                                recipes: responcee
+                            });
+                            console.log(responcee[29]);
+                        }
+                        else { }
+                    })
+                    .catch(error => {
+                        responcee.push([""])
+                    })
+
+            })
+
         })
         .catch(err => {
             // console.log(err);
@@ -92,8 +130,9 @@ router.get('/getrecipe/:recipeId', (req, res, next) => {
                 .select("channelname -_id")
                 .then(result => {
                     const response = {
-                        recipe: docs,
-                        result
+                        // recipe: docs,
+                        value : docs,
+                        chanalename: result
                     }
                     return res.status(200).json(response);
                 })

@@ -6,6 +6,7 @@ const Category = require('../models/category');
 const category = require('../models/category');
 const recipe = require('../models/recipe');
 const { json } = require('body-parser');
+const channel = require('../models/channel');
 
 router.get("/search/ingredient/:name", function (req, res) {
     var regex = new RegExp(req.params.name, 'i');
@@ -135,7 +136,30 @@ router.post("/filter/list", (req, res, next) => {
     .populate('ingre', ["name"])
         .exec()
         .then(docs => {
-            return res.status(200).json(docs);
+            var i = 0;
+            var temp = docs;
+            var responcee = [];
+
+            temp.map(value => {
+                channel.find({ recipe_ids: { "$in": [value._id] } })
+                    .select("channelname -_id")
+                    .then(result => {
+                        value.chanalename = result;
+                        responcee.push({value, chanalename: result})
+                        i++;
+                        if (i === docs.length) {
+                            res.status(200).json({
+                                total_recipes: responcee.length,
+                                recipes: responcee
+                            });
+                            console.log(responcee[29]);
+                        }
+                        else { }
+                    })
+                    .catch(error => {
+                        responcee.push([""])
+                    })
+                })
         })
         .catch(err => {
             res.status(500).json({

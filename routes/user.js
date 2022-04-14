@@ -124,26 +124,46 @@ router.get('/get/user', (req, res, next) => {
         });
 })
 
-router.post('/post/resetPassword/user', (req, res, next) => {
-    bcrypt.hash(req.body.password, 10, (err, hash) => {
-        User.find({ $and: [{ _id: req.body._id }, { password: hash }] })
-            .then(result => {
-                if (result == null) {
-                    //return not valid old password
+router.post('/post/resetPassword/:userid', (req, res, next) => {
+    // bcrypt.hash(req.body.password, 10, (err, hash) => {
+    User.findOne({ _id: req.params.userid })
+        .then(result => {
+            bcrypt.compare(req.body.password, result.password, (err, result) => {
+                console.log(err)
+                if (err) {
+                    //return not valid old password\
+                    res.status(301).json({
+                        error: "old password is wrong!!"
+                    });
+                }
+                else if (result) {
+                    bcrypt.hash(req.body.newpassword, 10, (err, hash) => {
+                        if (err) res.status(500).json({ err: "internal server err" })
+                        User.updateOne({ _id: req.params.userid }, { password: hash })
+                            .then(
+                                res.status(200).json({ message: "password is reset" })
+                            )
+                            .catch(err => {
+                                console.log(err);
+                                res.status(501).json({
+                                    error: err
+                                });
+                            })
+                    })
                 }
                 else {
-                    User.updateOne({ _id: req.body._id }, { password: req.body.newPassword }).then(
-                        res.send(200).json({ message })
-                    )
+                    res.status(301).json({
+                        error: "old password is wrong!!", err
+                    });
                 }
-            }).catch(err => {
-                // console.log(err);
-                res.status(500).json({
-                    error: err
-                });
-            });
-    })
+            })
 
+        }).catch(err => {
+            // console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
 })
 
 router.get('/get/byusername/:username', (req, res, next) => {
