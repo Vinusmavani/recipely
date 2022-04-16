@@ -32,7 +32,7 @@ router.get('/getonecomment/:commentId', (req, res, next) => {
     const id = req.params.commentId;
     Comment.findById(id)
         .select(' userid recipeid comment rating visibility ')
-        .populate('user', ['username', 'avtid'])
+        .populate('user')
         .exec()
         .then(comment => {
             if (!comment) {

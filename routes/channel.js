@@ -107,7 +107,7 @@ router.patch("/update/channel", (req, res) => {
 router.get('/get/channel', (req, res, next) => {
     Channel.find()
         //TODO set limit
-        .select('channelname email')
+        // .select('channelname email')
         .exec()
         .then(docs => {
             const response = {
