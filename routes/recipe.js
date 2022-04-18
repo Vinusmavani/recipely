@@ -96,7 +96,7 @@ router.post('/post/recipe/:channelId', upload.single('Rpic'), async (req, res, n
     });
     await recipe.save()
         .then(result => {
-            // console.log(result);
+            console.log(result);
             Channel.updateOne({ _id: req.params.channelId }, { $push: { recipe_ids: result._id } }).then(result => {
                 return res.status(201).json({
                     message: 'handling post request in /recipe',
@@ -145,6 +145,28 @@ router.get('/getrecipe/:recipeId', (req, res, next) => {
             });
         });
 });
+
+router.get('/getrecipe/bychannel/:channelId', (req, res, next) => {
+    Channel.findById(req.params.channelId)
+        .select('recipe_ids')
+        .populate('recipe_ids')
+        .exec()
+        .then(docs => {
+            console.log(docs);
+            const response = {
+                // count: docs.length,
+                recipes: docs
+            }
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+})
+
 
 router.post('/addfavourite/:userId', (req, res, next) => {
     User.updateOne({ _id: req.params.userId }, { $push: { favourite: req.body.recipeId } })

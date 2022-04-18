@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const userSchema = mongoose.Schema({
-    // _id: mongoose.Schema.Types.ObjectId,
     name: String,
     username: { unique: true, type: String, required: true },
     email: {
